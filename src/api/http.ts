@@ -31,11 +31,18 @@ export const httpApi: BpeakApi = {
     return result
   },
   me: () => request('/me'),
+  saveProfile: (body) => request('/me', { method: 'PATCH', body: JSON.stringify(body) }),
   saveTimetable: (body) =>
     request('/me/timetable', { method: 'PUT', body: JSON.stringify(body) }),
-  matches: () => request('/matches'),
+  matches: (filters) => {
+    const params = new URLSearchParams()
+    filters?.mbti?.forEach((type) => params.append('mbti', type))
+    const query = params.toString()
+    return request(`/matches${query ? `?${query}` : ''}`)
+  },
   requestChat: (mateId) =>
     request(`/matches/${mateId}/chat-requests`, { method: 'POST' }),
+  listChats: () => request('/chats'),
   listMessages: (mateId) => request(`/chats/${mateId}/messages`),
   sendMessage: (mateId, body) =>
     request(`/chats/${mateId}/messages`, { method: 'POST', body: JSON.stringify(body) }),

@@ -1,6 +1,6 @@
 import { MOCK_MATES, MOCK_PROFILE, MOCK_REPORT, SCHOOL_DOMAIN, SEED_CHAT } from '../data'
 import { emptyHoursFromSlots, rangesFromSlots } from '../timetable'
-import type { ChatMessage } from '../types'
+import type { ChatMessage, ChatThread, UserProfile } from '../types'
 import type { BpeakApi } from './types'
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -8,6 +8,8 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 const MOCK_CODE = '123456'
 let token: string | null = localStorage.getItem('bpeak-token')
 const extraMessages: Record<string, ChatMessage[]> = {}
+let mockProfile: UserProfile = { ...MOCK_PROFILE }
+const mockThreads = new Set<string>(['minsu'])
 
 function requireAuth() {
   if (!token) {
@@ -34,14 +36,23 @@ export const mockApi: BpeakApi = {
     localStorage.setItem('bpeak-token', token)
     return {
       accessToken: token,
-      profile: { ...MOCK_PROFILE, email },
+      profile: { ...mockProfile, email },
     }
   },
 
   async me() {
     await wait(200)
     requireAuth()
-    return MOCK_PROFILE
+    return mockProfile
+  },
+
+  async saveProfile(body) {
+    await wait(200)
+    mockProfile = {
+      ...mockProfile,
+      ...(body.mbti !== undefined ? { mbti: body.mbti } : {}),
+    }
+    return mockProfile
   },
 
   async saveTimetable({ slots }) {
@@ -52,16 +63,36 @@ export const mockApi: BpeakApi = {
     }
   },
 
-  async matches() {
+  async matches(filters) {
     await wait(300)
-    return { mates: MOCK_MATES }
+    const selected = filters?.mbti ?? []
+    const mates =
+      selected.length === 0 ? MOCK_MATES : MOCK_MATES.filter((mate) => selected.includes(mate.mbti))
+    return { mates }
   },
 
   async requestChat(mateId) {
     await wait(250)
     const mate = MOCK_MATES.find((item) => item.id === mateId)
     if (!mate) throw new Error('메이트를 찾을 수 없습니다.')
+    mockThreads.add(mateId)
     return { chatId: mateId, mate }
+  },
+
+  async listChats() {
+    await wait(180)
+    const threads: ChatThread[] = [...mockThreads].map((mateId) => {
+      const extras = extraMessages[mateId] ?? []
+      const lastExtra = extras[extras.length - 1]
+      const seed = SEED_CHAT[mateId] ?? []
+      const lastSeed = seed[seed.length - 1]
+      return {
+        mateId,
+        lastText: lastExtra?.text ?? lastSeed?.text ?? '채팅을 시작해 보세요.',
+        lastFrom: lastExtra?.from ?? lastSeed?.from ?? 'mate',
+      }
+    })
+    return threads
   },
 
   async listMessages(mateId) {

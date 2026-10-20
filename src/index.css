@@ -353,7 +353,7 @@ a { color: inherit; text-decoration: none; }
   background: #fff;
   border-top: 1px solid #eef2f6;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   flex-shrink: 0;
   padding-bottom: 6px;
 }
@@ -362,10 +362,13 @@ a { color: inherit; text-decoration: none; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
   color: #b0b8c2;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  text-align: center;
+  padding: 0 2px;
 }
 .nav-item.active { color: var(--primary); }
 .nav-item svg { width: 22px; height: 22px; }
@@ -417,6 +420,78 @@ a { color: inherit; text-decoration: none; }
   padding: 5px 10px;
   font-size: 12px;
   font-weight: 700;
+}
+.pill.accent {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.filter-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 14px 14px 12px;
+  margin-bottom: 14px;
+}
+.filter-card strong { font-size: 14px; }
+.text-link {
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 800;
+}
+.mbti-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.mbti-chip {
+  height: 36px;
+  border-radius: 10px;
+  background: #f4f7fb;
+  color: #5b6573;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.mbti-chip.on {
+  background: var(--primary);
+  color: #fff;
+}
+.mbti-help {
+  color: var(--text-2);
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.empty-note {
+  background: #fff;
+  border-radius: 18px;
+  padding: 22px 16px;
+  text-align: center;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.chat-row {
+  width: 100%;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #fff;
+  border-radius: 20px;
+  padding: 14px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+.chat-row-body { flex: 1; min-width: 0; }
+.chat-row-body p {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .chat-req {
   height: 34px;

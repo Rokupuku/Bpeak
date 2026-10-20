@@ -1,4 +1,8 @@
-import type { BeautyReport, DayKey, HourSlot, Mate, UserProfile } from './types'
+import type { BeautyReport, DayKey, HourSlot, Mate, Mbti, UserProfile } from './types'
+import { MBTI_TYPES } from './types'
+
+export { MBTI_TYPES }
+export type { Mbti }
 
 export const DAYS: { key: DayKey; label: string }[] = [
   { key: 'mon', label: '월' },
@@ -22,6 +26,7 @@ export const MOCK_PROFILE: UserProfile = {
   verified: true,
   emptyHours: 5,
   mateTag: '공부 메이트',
+  mbti: null,
 }
 
 export const MOCK_MATES: Mate[] = [
@@ -31,6 +36,7 @@ export const MOCK_MATES: Mate[] = [
     displayName: '민수',
     major: '컴퓨터공학',
     year: 3,
+    mbti: 'ENFP',
     matchPercent: 92,
     overlapLabel: '공강 겹침 13-15시',
     tags: ['카페 / 공부', '학교 인증'],
@@ -41,6 +47,7 @@ export const MOCK_MATES: Mate[] = [
     displayName: '서연',
     major: '간호학과',
     year: 2,
+    mbti: 'ISFJ',
     matchPercent: 87,
     overlapLabel: '공강 겹침 10-13시',
     tags: ['산책 / 공부', '학교 인증'],
@@ -51,9 +58,32 @@ export const MOCK_MATES: Mate[] = [
     displayName: '지훈',
     major: '소프트웨어',
     year: 3,
+    mbti: 'INTJ',
     matchPercent: 84,
     overlapLabel: '공강 겹침 13-15시',
     tags: ['게임 / 공부', '학교 인증'],
+  },
+  {
+    id: 'harin',
+    givenName: '하',
+    displayName: '하린',
+    major: '경영학과',
+    year: 2,
+    mbti: 'ENTP',
+    matchPercent: 81,
+    overlapLabel: '공강 겹침 10-13시',
+    tags: ['카페 / 수다', '학교 인증'],
+  },
+  {
+    id: 'doyun',
+    givenName: '도',
+    displayName: '도윤',
+    major: '전자공학',
+    year: 4,
+    mbti: 'INFP',
+    matchPercent: 79,
+    overlapLabel: '공강 겹침 13-15시',
+    tags: ['도서관 / 공부', '학교 인증'],
   },
 ]
 

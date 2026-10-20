@@ -1,8 +1,10 @@
 import type {
   BeautyReport,
   ChatMessage,
+  ChatThread,
   EmptyRange,
   Mate,
+  Mbti,
   NotificationSettings,
   UserProfile,
 } from '../types'
@@ -57,13 +59,24 @@ export interface AnalysisResultResponse {
   report: BeautyReport | null
 }
 
+export interface MatchFilters {
+  mbti?: Mbti[]
+}
+
+export interface SaveProfileRequest {
+  mbti?: Mbti | null
+  preferredMbtis?: Mbti[]
+}
+
 export type BpeakApi = {
   sendEmailCode: (body: SendEmailCodeRequest) => Promise<SendEmailCodeResponse>
   verifyEmailCode: (body: VerifyEmailCodeRequest) => Promise<VerifyEmailCodeResponse>
   me: () => Promise<UserProfile>
+  saveProfile: (body: SaveProfileRequest) => Promise<UserProfile>
   saveTimetable: (body: SaveTimetableRequest) => Promise<SaveTimetableResponse>
-  matches: () => Promise<MatchListResponse>
+  matches: (filters?: MatchFilters) => Promise<MatchListResponse>
   requestChat: (mateId: string) => Promise<ChatRequestResponse>
+  listChats: () => Promise<ChatThread[]>
   listMessages: (mateId: string) => Promise<ChatMessage[]>
   sendMessage: (mateId: string, body: SendMessageRequest) => Promise<ChatMessage>
   submitAnalysis: (photo?: File) => Promise<AnalysisSubmitResponse>

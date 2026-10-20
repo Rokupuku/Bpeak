@@ -6,6 +6,27 @@ export type SlotId = `${DayKey}-${HourSlot}`
 
 export type AuthStatus = 'guest' | 'pending' | 'verified'
 
+export const MBTI_TYPES = [
+  'INTJ',
+  'INTP',
+  'ENTJ',
+  'ENTP',
+  'INFJ',
+  'INFP',
+  'ENFJ',
+  'ENFP',
+  'ISTJ',
+  'ISFJ',
+  'ESTJ',
+  'ESFJ',
+  'ISTP',
+  'ISFP',
+  'ESTP',
+  'ESFP',
+] as const
+
+export type Mbti = (typeof MBTI_TYPES)[number]
+
 export interface UserProfile {
   id: string
   givenName: string
@@ -14,6 +35,7 @@ export interface UserProfile {
   verified: boolean
   emptyHours: number
   mateTag: string
+  mbti: Mbti | null
 }
 
 export interface EmptyRange {
@@ -29,9 +51,16 @@ export interface Mate {
   displayName: string
   major: string
   year: number
+  mbti: Mbti
   matchPercent: number
   overlapLabel: string
   tags: string[]
+}
+
+export interface ChatThread {
+  mateId: string
+  lastText: string
+  lastFrom: 'me' | 'mate'
 }
 
 export interface ChatMessage {
@@ -61,6 +90,9 @@ export interface AppSnapshot {
   authStatus: AuthStatus
   email: string
   selectedSlots: SlotId[]
+  mbti: Mbti | null
+  preferredMbtis: Mbti[]
+  openChats: string[]
   report: BeautyReport | null
   analysisDone: boolean
   messagesByMate: Record<string, ChatMessage[]>

@@ -111,7 +111,8 @@ Java API만 브라우저에 노출합니다. Python ML과 저장소 URL은 외�
 1. 겹친 공강 시간 (핵심, 정렬 1순위)
 2. 학교 인증 여부
 3. 활동 선호 / 관심사
-4. 외모 분석 점수는 **보조 지표만**. 이 값만으로 순위를 바꾸지 않음
+4. 요청자가 고른 **원하는 MBTI** (쿼리로 필터, 정렬 1순위가 아님)
+5. 외모 분석 점수는 **보조 지표만**. 이 값만으로 순위를 바꾸지 않음
 
 `matchPercent`는 0–100 정수. 겹친 시간 비율을 기본으로 하고, 인증·태그를 소폭 가산합니다.
 
@@ -122,7 +123,11 @@ Java API만 브라우저에 노출합니다. Python ML과 저장소 URL은 외�
 ```
 users
   id, email unique, given_name, display_name, major, year,
-  mate_tag, verified_at, created_at
+  mate_tag, mbti, verified_at, created_at
+  -- mbti: 16종 문자열 또는 null (INTJ … ESFP)
+
+match_filters
+  user_id, mbti          -- 사용자가 만나고 싶은 MBTI. 여러 행. 비어 있으면 전체
 
 timetable_slots
   user_id, day, hour
@@ -202,7 +207,8 @@ notification_settings
     "email": "student@bu.ac.kr",
     "verified": true,
     "emptyHours": 0,
-    "mateTag": "공부 메이트"
+    "mateTag": "공부 메이트",
+    "mbti": null
   }
 }
 ```
@@ -228,10 +234,20 @@ notification_settings
 요청 (있는 필드만):
 
 ```json
-{ "displayName": "사용자", "mateTag": "공부 메이트", "givenName": "김" }
+{
+  "displayName": "사용자",
+  "mateTag": "공부 메이트",
+  "givenName": "김",
+  "mbti": "ENFP",
+  "preferredMbtis": ["ENFP", "ENTP"]
+}
 ```
 
-응답: 갱신된 `profile`.
+응답: 갱신된 `profile`. `mbti`는 내 유형(단일, 없으면 `null`). `preferredMbtis`는 매칭 필터용이며 프로필 응답에 같이 내려도 됩니다. 허용 값은 아래 16종입니다.
+
+`INTJ INTP ENTJ ENTP INFJ INFP ENFJ ENFP ISTJ ISFJ ESTJ ESFJ ISTP ISFP ESTP ESFP`
+
+잘못된 문자열은 `400`.
 
 ### `PUT /me/timetable`
 
@@ -274,6 +290,10 @@ Bearer 필요. 본인 시간표가 있어야 의미 있는 결과를 줄 수 있
 
 ### `GET /matches`
 
+쿼리(선택): `mbti`를 반복하거나 콤마로 넘깁니다. 예: `/matches?mbti=ENFP&mbti=ENTP`
+
+값이 없으면 전체. 값이 있으면 **상대의 `mbti`가 그 집합에 있는 사람만** 반환합니다. 공강 겹침 정렬은 그대로입니다.
+
 응답:
 
 ```json
@@ -285,6 +305,7 @@ Bearer 필요. 본인 시간표가 있어야 의미 있는 결과를 줄 수 있
       "displayName": "민수",
       "major": "컴퓨터공학",
       "year": 3,
+      "mbti": "ENFP",
       "matchPercent": 92,
       "overlapLabel": "공강 겹침 13-15시",
       "tags": ["카페 / 공부", "학교 인증"]
@@ -299,6 +320,7 @@ Bearer 필요. 본인 시간표가 있어야 의미 있는 결과를 줄 수 있
 - 학교 미인증 사용자는 후순위 또는 제외 (프로토타입 카드는 모두 `"학교 인증"` 태그)
 - `tags`는 활동 선호 1개 + 인증 여부 정도면 충분
 - `year`는 학년 정수
+- `mbti`는 필수. 미설정 사용자는 필터가 있을 때 제외
 
 ### `POST /matches/{mateId}/chat-requests`
 
@@ -315,6 +337,7 @@ Bearer 필요. 본인 시간표가 있어야 의미 있는 결과를 줄 수 있
     "displayName": "민수",
     "major": "컴퓨터공학",
     "year": 3,
+    "mbti": "ENFP",
     "matchPercent": 92,
     "overlapLabel": "공강 겹침 13-15시",
     "tags": ["카페 / 공부", "학교 인증"]
@@ -331,6 +354,22 @@ Bearer 필요. 본인 시간표가 있어야 의미 있는 결과를 줄 수 있
 Bearer 필요. 1차는 REST. 실시간은 이후 `WebSocket /ws/chats/{chatId}`.
 
 경로의 `{mateId}`는 1차에서 상대 user id로 둡니다. 스레드 id로 바꾸면 프론트와 함께 수정합니다.
+
+하단 탭 **채팅** 목록용입니다.
+
+### `GET /chats`
+
+응답: 내가 참여 중인 스레드. 최근 메시지 순.
+
+```json
+[
+  {
+    "mateId": "u_minsu",
+    "lastText": "좋아요. 학교 카페 어때요?",
+    "lastFrom": "mate"
+  }
+]
+```
 
 ### `GET /chats/{mateId}/messages`
 
@@ -463,13 +502,16 @@ Bearer 필요. `multipart/form-data`, 필드명 `photo`.
 
 ```
 UserProfile
-  id, givenName, displayName, email, verified, emptyHours, mateTag
+  id, givenName, displayName, email, verified, emptyHours, mateTag, mbti
 
 EmptyRange
   day, start, end, label
 
 Mate
-  id, givenName, displayName, major, year, matchPercent, overlapLabel, tags[]
+  id, givenName, displayName, major, year, mbti, matchPercent, overlapLabel, tags[]
+
+ChatThread
+  mateId, lastText, lastFrom
 
 ChatMessage
   id, mateId, from, text, sentAt

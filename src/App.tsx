@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { Analysis } from './screens/Analysis'
 import { Auth } from './screens/Auth'
 import { Chat } from './screens/Chat'
+import { Chats } from './screens/Chats'
 import { Landing } from './screens/Landing'
 import { Mates } from './screens/Mates'
 import { Notifications } from './screens/Notifications'
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/auth" element={<Auth />} />
           <Route path="/timetable" element={<Timetable />} />
           <Route path="/mates" element={<Mates />} />
+          <Route path="/chats" element={<Chats />} />
           <Route path="/analysis" element={<Analysis />} />
           <Route path="/analysis/report" element={<Report />} />
           <Route path="/chat/:mateId" element={<Chat />} />

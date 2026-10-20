@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api/client'
 import { Header } from '../components/Header'
+import { useAppState } from '../context/AppState'
 import { MOCK_MATES, SEED_CHAT } from '../data'
 import type { ChatMessage } from '../types'
 
@@ -18,6 +19,7 @@ function seedMessages(mateId: string): ChatMessage[] {
 export function Chat() {
   const { mateId = '' } = useParams()
   const navigate = useNavigate()
+  const { openChat } = useAppState()
   const mate = MOCK_MATES.find((item) => item.id === mateId)
   const [text, setText] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>(() => seedMessages(mateId))
@@ -27,8 +29,9 @@ export function Chat() {
       navigate('/mates', { replace: true })
       return
     }
+    openChat(mateId)
     void api.listMessages(mateId).then(setMessages)
-  }, [mate, mateId, navigate])
+  }, [mate, mateId, navigate, openChat])
 
   const send = async () => {
     const value = text.trim()
@@ -42,9 +45,9 @@ export function Chat() {
 
   return (
     <section className="screen chat-screen">
-      <Header backTo="/mates" />
+      <Header backTo="/chats" />
       <div className="chat-head">
-        <p className="kicker">MATCHED</p>
+        <p className="kicker">MATCHED · {mate.mbti}</p>
         <h1 className="page-title sm">{mate.displayName}님과 대화</h1>
       </div>
       <div className="chat-list">

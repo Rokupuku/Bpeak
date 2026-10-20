@@ -5,6 +5,7 @@ import type {
   AuthStatus,
   BeautyReport,
   ChatMessage,
+  Mbti,
   NotificationSettings,
   SlotId,
   UserProfile,
@@ -16,6 +17,9 @@ const defaultSnapshot: AppSnapshot = {
   authStatus: 'guest',
   email: '',
   selectedSlots: [...DEFAULT_SLOTS],
+  mbti: null,
+  preferredMbtis: [],
+  openChats: ['minsu'],
   report: null,
   analysisDone: false,
   messagesByMate: {},
@@ -44,6 +48,9 @@ interface AppStateValue {
   toggleSlot: (slot: SlotId) => void
   markAnalysisDone: (report: BeautyReport) => void
   setNotifications: (notifications: NotificationSettings) => void
+  setMbti: (mbti: Mbti) => void
+  setPreferredMbtis: (preferredMbtis: Mbti[]) => void
+  openChat: (mateId: string) => void
   appendMessage: (mateId: string, message: ChatMessage) => void
 }
 
@@ -94,6 +101,18 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       })),
     [persist],
   )
+  const setMbti = useCallback((mbti: Mbti) => persist((prev) => ({ ...prev, mbti })), [persist])
+  const setPreferredMbtis = useCallback(
+    (preferredMbtis: Mbti[]) => persist((prev) => ({ ...prev, preferredMbtis })),
+    [persist],
+  )
+  const openChat = useCallback(
+    (mateId: string) =>
+      persist((prev) =>
+        prev.openChats.includes(mateId) ? prev : { ...prev, openChats: [mateId, ...prev.openChats] },
+      ),
+    [persist],
+  )
 
   const profile = useMemo<UserProfile>(
     () => ({
@@ -101,8 +120,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       email: snapshot.email || MOCK_PROFILE.email,
       verified: snapshot.authStatus === 'verified',
       emptyHours: snapshot.selectedSlots.length,
+      mbti: snapshot.mbti,
     }),
-    [snapshot.authStatus, snapshot.email, snapshot.selectedSlots.length],
+    [snapshot.authStatus, snapshot.email, snapshot.mbti, snapshot.selectedSlots.length],
   )
 
   const value = useMemo<AppStateValue>(
@@ -114,9 +134,24 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       toggleSlot,
       markAnalysisDone,
       setNotifications,
+      setMbti,
+      setPreferredMbtis,
+      openChat,
       appendMessage,
     }),
-    [snapshot, profile, setEmail, setAuthStatus, toggleSlot, markAnalysisDone, setNotifications, appendMessage],
+    [
+      snapshot,
+      profile,
+      setEmail,
+      setAuthStatus,
+      toggleSlot,
+      markAnalysisDone,
+      setNotifications,
+      setMbti,
+      setPreferredMbtis,
+      openChat,
+      appendMessage,
+    ],
   )
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>
